@@ -40,7 +40,7 @@
             android:layout_weight="1"
             android:contentDescription="@string/mode_car"
             android:gravity="center"
-            android:src="@drawable/ic_directions_car_black_24dp"
+            android:src="@drawable/ic_drive_eta_black_24dp"
             android:visibility="gone" />
 
         <ImageView
