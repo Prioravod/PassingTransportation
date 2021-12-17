@@ -1,9 +1,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     <!--
 
-        Copyright (C) 2017 Anupam Das
+        Copyright (C)2021 Petrov Pavel
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -18,9 +19,7 @@
         limitations under the License.
 
         -->
-    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
@@ -32,7 +31,7 @@
             android:layout_height="fill_parent"
             android:gravity="bottom">
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/drive_toggle_fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -42,9 +41,9 @@
                 android:layout_margin="@dimen/title_bottom_margin"
                 android:contentDescription="@string/start_navigation"
                 android:src="@drawable/ic_directions_white_24dp"
-                mapbox:backgroundTint="@color/colorAccent" />
+                app:backgroundTint="@color/colorAccent" />
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/location_toggle_fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -56,7 +55,7 @@
                 android:layout_marginRight="@dimen/title_bottom_margin"
                 android:contentDescription="@string/toogle_location_service"
                 android:src="@drawable/ic_my_location_24dp"
-                mapbox:backgroundTint="@color/colorAccent" />
+                app:backgroundTint="@color/colorAccent" />
 
         </RelativeLayout>
 
@@ -71,21 +70,21 @@
                 android:id="@+id/mapView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                mapbox:center_latitude="23.242598"
-                mapbox:center_longitude="87.880908"
-                mapbox:style_url="mapbox://styles/mapbox/streets-v9"
-                mapbox:zoom="14" />
+                app:center_latitude="51.5295907"
+                app:center_longitude="45.9787404"
+                app:style_url="mapbox://styles/mapbox/streets-v9"
+                app:zoom="10" />
 
         </RelativeLayout>
 
-        <android.support.design.widget.AppBarLayout
+        <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-            <android.support.design.widget.CollapsingToolbarLayout
+            <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:id="@+id/collapsing_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -109,7 +108,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/zero"
+                        android:layout_height="130dp"
                         android:layout_weight="3"
                         android:orientation="horizontal"
                         android:paddingTop="@dimen/padding_top_search"
@@ -122,15 +121,14 @@
                             android:orientation="vertical"
                             android:weightSum="2">
 
-                            <View
+                            <androidx.appcompat.widget.Toolbar
+                                android:id="@+id/toolbar"
                                 android:layout_width="match_parent"
-                                android:layout_height="@dimen/zero"
-                                android:layout_weight="1" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="@dimen/zero"
-                                android:layout_weight="1" />
+                                android:layout_height="?attr/actionBarSize"
+                                android:fitsSystemWindows="false"
+                                app:layout_collapseMode="pin"
+                                app:layout_scrollFlags="scroll|enterAlways"
+                                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -222,19 +220,10 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <android.support.v7.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:fitsSystemWindows="false"
-                    app:layout_collapseMode="pin"
-                    app:layout_scrollFlags="scroll|enterAlways"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-            </android.support.design.widget.CollapsingToolbarLayout>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
 
 
-        </android.support.design.widget.AppBarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>

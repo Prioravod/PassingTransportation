@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Moto Navigator</string>
-    <string name="PUBLIC_TOKEN" translatable="false">pk.eyJ1Ijoib3B0aWNvZCIsImEiOiJjaXF1bHplMnQwMDVvMDRqNmc3bnJ4ZXNyIn0.sYS6SFog947nQwX649-EgQ</string>
+    <string name="PUBLIC_TOKEN" translatable="false">pk.eyJ1IjoicGV0cm92cHMiLCJhIjoiY2t3cXdreW96MHFybDJwcG03eXdkMjFhbiJ9.3GV9FKFx0J-aCwrnHfh2cQ</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -30,9 +30,9 @@
     <string name="set_dest">Set Destination!</string>
     <string name="route_is">"Route is "</string>
     <string name="long_str">long</string>
-    <string name="moto_navigator" translatable="false">Moto Navigator</string>
+    <string name="passing_transportation" translatable="false">Passing Transportation</string>
     <string name="by">by</string>
-    <string name="anupam_das" translatable="false">ANUPAM DAS</string>
+    <string name="petrov_pavel" translatable="false">PETROV PAVEL</string>
     <string name="opticod" translatable="false">(opticod)</string>
     <string name="or">OR</string>
     <string name="guest_login">GUEST LOGIN</string>

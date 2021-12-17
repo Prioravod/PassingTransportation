@@ -1,16 +1,13 @@
 /*
- * Copyright (c) 2016 Anupam Das.
+ * Copyright (c) 2021 Petrov Pavel.
  */
 
-package work.technie.motonavigator;
+package ru.petrovpavel.passingtransportation;
 
 import android.app.Application;
 
 import com.mapbox.mapboxsdk.MapboxAccountManager;
 
-/**
- * Created by anupam on 20/7/16.
- */
 public class MotoApplication extends Application {
 
     @Override

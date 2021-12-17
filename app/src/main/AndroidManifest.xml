@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="work.technie.motonavigator">
+    package="ru.petrovpavel.passingtransportation">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".MotoApplication"
@@ -18,7 +19,8 @@
         <activity
             android:name=".activity.LaunchScreenActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppThemeNoActionBarFullScreen">
+            android:theme="@style/AppThemeNoActionBarFullScreen"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,20 +35,23 @@
             android:name=".activity.BaseActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <service android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService" />
+        <service
+            android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService"
+            android:exported="true"/>
         <provider
             android:name=".data.MotorProvider"
-            android:authorities="work.technie.motonavigator"
+            android:authorities="ru.petrovpavel.passingtransportation"
             android:exported="true" />
 
         <receiver
             android:name=".widget.CollectionWidgetProvider"
             android:enabled="true"
-            android:label="Drives">
+            android:label="Drives"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="work.technie.motonavigator.ACTION_DATA_UPDATED" />
-                <action android:name="work.technie.motonavigator.UPDATE_MY_WIDGET" />
+                <action android:name="ru.petrovpavel.passingtransportation.ACTION_DATA_UPDATED" />
+                <action android:name="ru.petrovpavel.passingtransportation.UPDATE_MY_WIDGET" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

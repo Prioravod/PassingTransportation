@@ -59,7 +59,7 @@ The result apk file will be placed in ```app/build/outputs/apk/```.
 
 ## Project License
 ```
-Copyright (C) 2017 Anupam Das
+Copyright (C)2021 Petrov Pavel
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
