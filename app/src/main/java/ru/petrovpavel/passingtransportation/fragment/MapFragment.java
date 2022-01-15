@@ -136,12 +136,14 @@ public class MapFragment extends Fragment {
     private View rootView;
 
     private final List<Route> availableRoutes = new ArrayList<>();
+    private final FirebaseDatabase firebaseDB = FirebaseDatabase.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         rootView = inflater.inflate(R.layout.fragment_map, container, false);
+        routesInitialization();
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
         DrawerLayout drawer = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
@@ -386,15 +388,28 @@ public class MapFragment extends Fragment {
 
                 autocompleteStart.clearFocus();
                 autocompleteDestination.clearFocus();
+//                Bundle arguments = new Bundle();
+//                arguments.putString(Intent.EXTRA_TEXT, route_id);
+//
+//                DriveFragment fragment = new DriveFragment();
+//                fragment.setArguments(arguments);
+//
+//                getActivity().getSupportFragmentManager().beginTransaction()
+//                        .addToBackStack(getString(R.string.back))
+//                        .add(R.id.frag_container, fragment, FRAGMENT_TAG_REST)
+//                        .commit();
                 Bundle arguments = new Bundle();
-                arguments.putString(Intent.EXTRA_TEXT, route_id);
+                arguments.putDouble(getString(R.string.origin_lng), origin.getLongitude());
+                arguments.putDouble(getString(R.string.origin_lat), origin.getLatitude());
+                arguments.putDouble(getString(R.string.destination_lng), origin.getLongitude());
+                arguments.putDouble(getString(R.string.destination_lat), destination.getLatitude());
 
-                DriveFragment fragment = new DriveFragment();
-                fragment.setArguments(arguments);
+                FragmentNavigation fragmentNavigation = new FragmentNavigation();
+                fragmentNavigation.setArguments(arguments);
 
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .addToBackStack(getString(R.string.back))
-                        .add(R.id.frag_container, fragment, FRAGMENT_TAG_REST)
+                        .add(R.id.frag_container, fragmentNavigation, FRAGMENT_TAG_REST)
                         .commit();
             }
         });
@@ -770,6 +785,51 @@ public class MapFragment extends Fragment {
                 }
             }
         }
+    }
+
+    private Bitmap bitmapFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        return Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+    }
+
+    private void routesInitialization() {
+        DatabaseReference myRef = firebaseDB.getReference("available_routes");
+
+        myRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Route value = snapshot.getValue(Route.class);
+                availableRoutes.add(value);
+                Log.d(TAG, "Added value: " + value);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Route value = snapshot.getValue(Route.class);
+                if (!availableRoutes.contains(value)) {
+                    availableRoutes.add(value);
+                }
+                Log.d(TAG, "Changed value: " + value);
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                Route value = snapshot.getValue(Route.class);
+                availableRoutes.remove(value);
+                Log.d(TAG, "Removed value: " + value);
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
     }
 
     private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
