@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="40dp">
+
+    <TextView
+        android:id="@+id/origin_offer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="origin_offer"
+        android:fontFamily="@font/ubuntu_condensed"
+        android:textFontWeight="20"
+        android:gravity="center"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:src="@drawable/ic_trending_flat_black_24dp" />
+
+    <TextView
+        android:id="@+id/destination_offer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="destination_offer"
+        android:fontFamily="@font/ubuntu_condensed"
+        android:textFontWeight="20"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/weight_offer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="weight_offer"
+        android:fontFamily="@font/ubuntu_condensed"
+        android:textFontWeight="20"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/payment_offer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="payment_offer"
+        android:fontFamily="@font/ubuntu_condensed"
+        android:textFontWeight="20"
+        android:gravity="center"/>
+</LinearLayout>
