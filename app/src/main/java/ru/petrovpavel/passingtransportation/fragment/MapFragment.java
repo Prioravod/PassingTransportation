@@ -212,8 +212,8 @@ public class MapFragment extends Fragment {
         swapLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String startStr = autocompleteStart.getText().toString();
-                String destinationStr = autocompleteDestination.getText().toString();
+                Editable startStr = autocompleteStart.getText();
+                Editable destinationStr = autocompleteDestination.getText();
                 autocompleteStart.setText(destinationStr);
                 autocompleteDestination.setText(startStr);
                 Position tmp = origin;
@@ -230,64 +230,46 @@ public class MapFragment extends Fragment {
                     map.removeMarker(markerDestination);
                 }
 
-                markerDestination = map.addMarker(new MarkerOptions()
-                        .position(new LatLng(destination.getLatitude(), destination.getLongitude())).title(getString(R.string.destination)));
-
-                markerOrigin = map.addMarker(new MarkerOptions()
+                if (destination != null) {
+                    markerDestination = map.addMarker(new MarkerOptions()
+                            .position(new LatLng(destination.getLatitude(), destination.getLongitude())).title(getString(R.string.destination)));
+                }
+                if (origin != null) {
+                    markerOrigin = map.addMarker(new MarkerOptions()
                         .position(new LatLng(origin.getLatitude(), origin.getLongitude())).title(getString(R.string.origin)));
-
-            }
-        });
-
-        Button walkPath = (Button) rootView.findViewById(R.id.walk);
-        walkPath.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Utility.hasNetworkConnection(mActivity)) {
-                    if (map != null) {
-                        try {
-                            if (validateForm(autocompleteStart, autocompleteDestination)) {
-                                getRoute(origin, destination, DirectionsCriteria.PROFILE_WALKING, true);
-                            }
-                        } catch (ServicesException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } else {
-                    Toast.makeText(mActivity, R.string.network_unavailable, Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-
-        Button bikePath = (Button) rootView.findViewById(R.id.cycle);
-        bikePath.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Utility.hasNetworkConnection(mActivity)) {
-                    if (map != null) {
-
-                        try {
-                            if (validateForm(autocompleteStart, autocompleteDestination)) {
-                                getRoute(origin, destination, DirectionsCriteria.PROFILE_CYCLING, true);
-                            }
-                        } catch (ServicesException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } else {
-                    Toast.makeText(mActivity, R.string.network_unavailable, Toast.LENGTH_SHORT).show();
                 }
             }
         });
+        RecyclerView routesView = (RecyclerView) rootView.findViewById(R.id.routesList);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
+        routesView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mActivity,
+                layoutManager.getOrientation());
+        routesView.addItemDecoration(dividerItemDecoration);
 
-        Button carPath = (Button) rootView.findViewById(R.id.drive);
-        carPath.setOnClickListener(new View.OnClickListener() {
+            }
+        });
+
+        routesView.setAdapter(availableRoutesAdapter);
+
+        Button availableRoutesPath = (Button) rootView.findViewById(R.id.available_routes);
+        availableRoutesPath.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                routesView.setVisibility(View.VISIBLE);
+                mapView.setVisibility(View.GONE);
+            }
+        });
+
+
+        Button driveButton = (Button) rootView.findViewById(R.id.drive);
+        driveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                routesView.setVisibility(View.GONE);
                 if (Utility.hasNetworkConnection(mActivity)) {
                     if (map != null) {
-
+                        mapView.setVisibility(View.VISIBLE);
                         try {
                             if (validateForm(autocompleteStart, autocompleteDestination)) {
                                 getRoute(origin, destination, DirectionsCriteria.PROFILE_DRIVING, true);
