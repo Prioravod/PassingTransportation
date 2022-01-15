@@ -1,0 +1,4 @@
+//Run this for mock current GPS location as SSTU university
+telnet localhost 5554
+auth S1BOFHhAN8pPhFFZ
+geo fix 45.978733 51.530213
