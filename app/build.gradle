@@ -1,5 +1,17 @@
 apply plugin: 'com.android.application'
 
+def getMapboxHash() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    return properties.getProperty("mapbox.token")
+}
+
+def getLocationIqHash() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    return properties.getProperty("location-iq.token")
+}
+
 android {
     compileSdkVersion 31
     defaultConfig {
@@ -8,6 +20,8 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "MAPBOX_TOKEN", "\""+getMapboxHash()+"\""
+        buildConfigField "String", "LOCATION_IQ_TOKEN", "\""+getLocationIqHash()+"\""
     }
     buildTypes {
         release {
