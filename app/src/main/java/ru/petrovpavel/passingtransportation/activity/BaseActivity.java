@@ -187,22 +187,22 @@ public class BaseActivity extends AppCompatActivity
                 //nothing
                 break;
             case 1:
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build();
-
-                GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
-                        .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                        .build();
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                        new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status) {
-
-                            }
-                        });
+//                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                        .requestIdToken(getString(R.string.default_web_client_id))
+//                        .requestEmail()
+//                        .build();
+//
+//                GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                        .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+//                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+//                        .build();
+//                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+//                        new ResultCallback<Status>() {
+//                            @Override
+//                            public void onResult(@NonNull Status status) {
+//
+//                            }
+//                        });
                 break;
             case 2:
                 //nothing
