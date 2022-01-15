@@ -7,14 +7,14 @@ package ru.petrovpavel.passingtransportation;
 import android.app.Application;
 
 import com.facebook.stetho.Stetho;
-import com.mapbox.mapboxsdk.MapboxAccountManager;
+import com.mapbox.mapboxsdk.Mapbox;
 
 public class MotoApplication extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
-        MapboxAccountManager.start(this, getString(R.string.PUBLIC_TOKEN));
+        Mapbox.getInstance(this, BuildConfig.MAPBOX_TOKEN);
         Stetho.initializeWithDefaults(this);
 
     }
