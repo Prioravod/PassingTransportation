@@ -19,13 +19,16 @@ import android.Manifest;
 import android.animation.TypeEvaluator;
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -37,6 +40,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
@@ -44,10 +48,22 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -57,11 +73,12 @@ import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.location.LocationListener;
-import com.mapbox.mapboxsdk.location.LocationServices;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.Constants;
 import com.mapbox.services.android.geocoder.ui.GeocoderAutoCompleteView;
 import com.mapbox.services.commons.ServicesException;
@@ -78,6 +95,7 @@ import com.mapbox.services.directions.v5.models.StepManeuver;
 import com.mapbox.services.geocoding.v5.GeocodingCriteria;
 import com.mapbox.services.geocoding.v5.models.GeocodingFeature;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -86,8 +104,12 @@ import java.util.Vector;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import ru.petrovpavel.passingtransportation.BuildConfig;
+import ru.petrovpavel.passingtransportation.adapter.AvailableRoutesAdapter;
 import ru.petrovpavel.passingtransportation.data.MapData;
 import ru.petrovpavel.passingtransportation.data.MotorContract;
+import ru.petrovpavel.passingtransportation.data.Route;
+import ru.petrovpavel.passingtransportation.utils.RouteConfirmationDialogBuilder;
 import ru.petrovpavel.passingtransportation.utils.Utility;
 import ru.petrovpavel.passingtransportation.widget.CollectionWidgetProvider;
 import ru.petrovpavel.passingtransportation.R;
@@ -99,7 +121,8 @@ public class MapFragment extends Fragment {
     private static String route_id;
     private final String FRAGMENT_TAG_REST = "FTAGR";
     FloatingActionButton floatingActionButton;
-    LocationServices locationServices;
+    LocationComponent locationComponent;
+    LocationEngine locationEngine;
     private MapView mapView;
     private MapboxMap map;
     private String mode;
@@ -111,6 +134,8 @@ public class MapFragment extends Fragment {
     private Polyline routePolyLine;
     private Activity mActivity;
     private View rootView;
+
+    private final List<Route> availableRoutes = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -127,8 +152,11 @@ public class MapFragment extends Fragment {
         setRetainInstance(true);
 
         final GeocoderAutoCompleteView autocompleteStart = (GeocoderAutoCompleteView) rootView.findViewById(R.id.query_start);
-        autocompleteStart.setAccessToken(getString(R.string.PUBLIC_TOKEN));
+
+        autocompleteStart.setAccessToken(BuildConfig.MAPBOX_TOKEN);
         autocompleteStart.setType(GeocodingCriteria.TYPE_POI);
+//        autocompleteStart.setType(GeocodingCriteria.TYPE_ADDRESS);
+
         autocompleteStart.setOnFeatureListener(new GeocoderAutoCompleteView.OnFeatureListener() {
             @Override
             public void OnFeatureClick(GeocodingFeature feature) {
@@ -139,8 +167,9 @@ public class MapFragment extends Fragment {
 
 
         final GeocoderAutoCompleteView autocompleteDestination = (GeocoderAutoCompleteView) rootView.findViewById(R.id.query_destination);
-        autocompleteDestination.setAccessToken(getString(R.string.PUBLIC_TOKEN));
+        autocompleteDestination.setAccessToken(BuildConfig.MAPBOX_TOKEN);
         autocompleteDestination.setType(GeocodingCriteria.TYPE_POI);
+//        autocompleteStart.setType(GeocodingCriteria.TYPE_ADDRESS);
         autocompleteDestination.setOnFeatureListener(new GeocoderAutoCompleteView.OnFeatureListener() {
             @Override
             public void OnFeatureClick(GeocodingFeature feature) {
@@ -149,7 +178,6 @@ public class MapFragment extends Fragment {
             }
         });
 
-        locationServices = LocationServices.getLocationServices(mActivity);
 
         mapView = (MapView) rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -159,15 +187,38 @@ public class MapFragment extends Fragment {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 map = mapboxMap;
-                mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                     @Override
-                    public void onMapClick(@NonNull LatLng point) {
-
+                    public boolean onMapClick(@NonNull LatLng point) {
                         appBarLayout.setExpanded(false);
+                        return true;
                     }
                 });
+                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                    @Override
+                    public boolean onMapLongClick(@NonNull LatLng point) {
+                        appBarLayout.setExpanded(true);
+                        return true;
+                    }
+                });
+                map.setStyle(Style.MAPBOX_STREETS);
+                map.setCameraPosition(
+                        new CameraPosition.Builder()
+                                .target(new LatLng(51.5295907, 45.9787404))
+                                .zoom(10)
+                                .build());
+                map.getStyle(new Style.OnStyleLoaded() {
+                    @Override
+                    public void onStyleLoaded(@NonNull Style style) {
+                        locationComponent = map.getLocationComponent();
+                        locationComponent.activateLocationComponent(new LocationComponentActivationOptions.Builder(mActivity, style).build());
+                        locationEngine = locationComponent.getLocationEngine();
+                    }
+                });
+
             }
         });
+
 
         rootView.findViewById(R.id.buttons).bringToFront();
 
@@ -177,7 +228,7 @@ public class MapFragment extends Fragment {
             public void onClick(View v) {
                 if (Utility.hasNetworkConnection(mActivity)) {
                     if (map != null) {
-                        toggleGps(!map.isMyLocationEnabled(), autocompleteStart);
+                        toggleGps(!locationComponent.isLocationComponentEnabled(), autocompleteStart);
                     }
                 } else {
                     Toast.makeText(mActivity, R.string.network_unavailable, Toast.LENGTH_SHORT).show();
@@ -194,9 +245,9 @@ public class MapFragment extends Fragment {
         getCurrentLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Location loc = map.getMyLocation();
+                Location loc = map.getLocationComponent().getLastKnownLocation();
                 if (loc == null) {
-                    if (!locationServices.areLocationPermissionsGranted()) {
+                    if (!PermissionsManager.areLocationPermissionsGranted(mActivity)) {
                         ActivityCompat.requestPermissions(mActivity, new String[]{
                                 Manifest.permission.ACCESS_COARSE_LOCATION,
                                 Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_LOCATION);
@@ -247,7 +298,12 @@ public class MapFragment extends Fragment {
                 layoutManager.getOrientation());
         routesView.addItemDecoration(dividerItemDecoration);
 
-            }
+        AvailableRoutesAdapter availableRoutesAdapter = new AvailableRoutesAdapter(mActivity, availableRoutes);
+        availableRoutesAdapter.setListener(route -> {
+            Toast.makeText(mActivity,
+                    MessageFormat.format("Origin = {0}, destination = {1} was clicked", route.getOrigin().getAlias(), route.getDestination().getAlias()),
+                    Toast.LENGTH_SHORT).show();
+            RouteConfirmationDialogBuilder.build(mActivity, route.getOrigin().getAlias(), route.getDestination().getAlias());
         });
 
         routesView.setAdapter(availableRoutesAdapter);
@@ -442,12 +498,12 @@ public class MapFragment extends Fragment {
         positions.add(origin);
 
         MapboxDirections client = new MapboxDirections.Builder()
-//                .setOrigin(origin)
-//                .setDestination(destination)
-                .setCoordinates(positions)
+                .setOrigin(origin)
+                .setDestination(destination)
+//                .setCoordinates(positions)
                 .setProfile(profile)
                 .setSteps(true)
-                .setAccessToken(getString(R.string.PUBLIC_TOKEN))
+                .setAccessToken(BuildConfig.MAPBOX_TOKEN)
                 .build();
 
         client.enqueueCall(new Callback<DirectionsResponse>() {
@@ -630,7 +686,7 @@ public class MapFragment extends Fragment {
     public void toggleGps(boolean enableGps, GeocoderAutoCompleteView autoCompleteView) {
         if (enableGps) {
             // Check if user has granted location permission
-            if (!locationServices.areLocationPermissionsGranted()) {
+            if (!PermissionsManager.areLocationPermissionsGranted(mActivity)) {
                 ActivityCompat.requestPermissions(mActivity, new String[]{
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_LOCATION);
@@ -642,14 +698,17 @@ public class MapFragment extends Fragment {
         }
     }
 
+    @SuppressWarnings( {"MissingPermission"})
     private Location enableLocation(boolean enabled, final GeocoderAutoCompleteView autoCompleteStart) {
         final Location[] newLocation = {null};
         final FlagGPSOneTime gps = new FlagGPSOneTime();
+
         if (enabled) {
-            map.setMyLocationEnabled(true);
-            locationServices.addLocationListener(new LocationListener() {
+            locationComponent.setLocationComponentEnabled(true);
+            locationEngine.getLastLocation(new LocationEngineCallback<LocationEngineResult>() {
                 @Override
-                public void onLocationChanged(Location location) {
+                public void onSuccess(LocationEngineResult result) {
+                    Location location = result.getLastLocation();
                     if (location != null && gps.flag) {
                         newLocation[0] = location;
                         if (routePolyLine != null) {
@@ -658,9 +717,8 @@ public class MapFragment extends Fragment {
                         if (markerOrigin != null) {
                             map.removeMarker(markerOrigin);
                         }
-                        IconFactory iconFactory = IconFactory.getInstance(mActivity);
-                        Drawable iconDrawable = ContextCompat.getDrawable(mActivity, R.drawable.default_marker);
-                        Icon icon = iconFactory.fromDrawable(iconDrawable);
+
+                        Icon icon = IconFactory.getInstance(mActivity).fromBitmap(bitmapFromVector(mActivity, R.drawable.ic_my_location_24dp));
 
                         markerOrigin = map.addMarker(new MarkerOptions()
                                 .position(new LatLng(location.getLatitude(), location.getLongitude())).title(getString(R.string.origin)).icon(icon));
@@ -678,20 +736,24 @@ public class MapFragment extends Fragment {
                                     location.getLatitude(),
                                     location.getLongitude(),
                                     1);
-                            autoCompleteStart.setText(address.get(0).getFeatureName());
+                            autoCompleteStart.setText(new String(address.get(0).getAddressLine(0).getBytes()));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                     gps.flag = false;
-                    map.setMyLocationEnabled(false);
+                    locationComponent.setLocationComponentEnabled(false);
+                }
+
+                @Override
+                public void onFailure(@NonNull Exception exception) {
 
                 }
             });
             floatingActionButton.setImageResource(R.drawable.ic_location_disabled_24dp);
         } else {
             floatingActionButton.setImageResource(R.drawable.ic_my_location_24dp);
-            map.setMyLocationEnabled(false);
+            locationComponent.setLocationComponentEnabled(false);
         }
         // Enable or disable the location layer on the map
         return newLocation[0];
