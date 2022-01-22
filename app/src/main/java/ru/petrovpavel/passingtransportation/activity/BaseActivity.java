@@ -110,7 +110,7 @@ public class BaseActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0 && !getSupportFragmentManager().isDestroyed()) {
                 getSupportFragmentManager().popBackStack();
             } else {
                 finish();
