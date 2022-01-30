@@ -401,7 +401,7 @@ public class MapFragment extends Fragment {
                 Bundle arguments = new Bundle();
                 arguments.putDouble(getString(R.string.origin_lng), origin.getLongitude());
                 arguments.putDouble(getString(R.string.origin_lat), origin.getLatitude());
-                arguments.putDouble(getString(R.string.destination_lng), origin.getLongitude());
+                arguments.putDouble(getString(R.string.destination_lng), destination.getLongitude());
                 arguments.putDouble(getString(R.string.destination_lat), destination.getLatitude());
 
                 FragmentNavigation fragmentNavigation = new FragmentNavigation();
