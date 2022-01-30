@@ -145,6 +145,10 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
                         public void onProgressChange(Location location, RouteProgress routeProgress) {
                             String traveledInfo = "Traveled : " + routeProgress.distanceTraveled();
                             Log.d("DISTANCE", traveledInfo);
+                            List<Route> optimalRoutes = routeEngineProxy.findOptimalRoutes(activity, RoutesHolder.getInstance().getAvailableRoutes(), location);
+                            if (!optimalRoutes.isEmpty()) {
+                                suggestRoutes(optimalRoutes);
+                            }
                         }
                     })
                     .build();

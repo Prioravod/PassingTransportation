@@ -9,5 +9,5 @@ import ru.petrovpavel.passingtransportation.data.Route;
 
 public interface RouteEngine {
 
-    void findRoutes(Activity activity, List<Route> availableRoutes, Location location);
+    List<Route> findOptimalRoutes(Activity activity, List<Route> availableRoutes, Location location);
 }

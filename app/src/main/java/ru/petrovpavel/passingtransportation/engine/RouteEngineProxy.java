@@ -2,9 +2,7 @@ package ru.petrovpavel.passingtransportation.engine;
 
 import android.app.Activity;
 import android.location.Location;
-import android.util.Log;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import ru.petrovpavel.passingtransportation.data.Route;
@@ -20,13 +18,13 @@ public class RouteEngineProxy implements RouteEngine {
         this.tickCounter = 0;
     }
 
-    public void findRoutes(Activity activity, List<Route> availableRoutes, Location location) {
-        Log.d("RouteEngineProxy", LocalDateTime.now().toString());
+    public List<Route> findOptimalRoutes(Activity activity, List<Route> availableRoutes, Location location) {
         if (tickCounter == TICK_MAX) {
             tickCounter = 0;
-            engine.findRoutes(activity, availableRoutes, location);
+            return engine.findOptimalRoutes(activity, availableRoutes, location);
         } else {
             tickCounter++;
         }
+        return null;
     }
 }

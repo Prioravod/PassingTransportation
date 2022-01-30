@@ -11,9 +11,9 @@ import ru.petrovpavel.passingtransportation.data.Route;
 
 public class RouteEngineImpl implements RouteEngine {
 
-    public void findRoutes(Activity activity, List<Route> availableRoutes, Location location) {
+    public List<Route> findOptimalRoutes(Activity activity, List<Route> availableRoutes, Location location) {
         Log.d("RouteEngineImpl", LocalDateTime.now().toString() + availableRoutes.toString());
-
+        return null;
     }
 
     /**TODO:
