@@ -26,6 +26,6 @@ public class Route {
         String to = Optional.ofNullable(destination)
                 .map(MapPoint::getAlias)
                 .orElse("");
-        return MessageFormat.format(DISPLAY_TEMPLATE, from, to, weight);
+        return MessageFormat.format(DISPLAY_TEMPLATE, from, to, weight, payment);
     }
 }

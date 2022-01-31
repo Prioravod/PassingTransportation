@@ -11,17 +11,17 @@ public class RouteEngineProxy implements RouteEngine {
 
     private byte tickCounter;
     private static final byte TICK_MAX = 15;
-    private RouteEngine engine;
+    private final RouteEngine engine;
 
     public RouteEngineProxy() {
         this.engine = new RouteEngineImpl();
         this.tickCounter = 0;
     }
 
-    public List<Route> findOptimalRoutes(Activity activity, List<Route> availableRoutes, Location location) {
+    public List<Route> findOptimalRoutes(Activity activity, Location location) {
         if (tickCounter == TICK_MAX) {
             tickCounter = 0;
-            return engine.findOptimalRoutes(activity, availableRoutes, location);
+            return engine.findOptimalRoutes(activity, location);
         } else {
             tickCounter++;
         }

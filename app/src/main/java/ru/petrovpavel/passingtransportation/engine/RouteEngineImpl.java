@@ -8,11 +8,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import ru.petrovpavel.passingtransportation.data.Route;
+import ru.petrovpavel.passingtransportation.data.memory.RoutesHolder;
+import ru.petrovpavel.passingtransportation.data.memory.VehicleHolder;
 
 public class RouteEngineImpl implements RouteEngine {
 
-    public List<Route> findOptimalRoutes(Activity activity, List<Route> availableRoutes, Location location) {
-        Log.d("RouteEngineImpl", LocalDateTime.now().toString() + availableRoutes.toString());
+    public List<Route> findOptimalRoutes(Activity activity, Location location) {
+        VehicleHolder vehicleHolder = VehicleHolder.getInstance();
+        RoutesHolder routesHolder = RoutesHolder.getInstance();
+
+        int availableCapacity = vehicleHolder.getAvailableCapacity();
+        Log.d("RouteEngineImpl", LocalDateTime.now().toString() + " availableCapacity = [" + availableCapacity + "] AvailableRoutes = [" + routesHolder.getAvailableRoutes() + "]");
         return null;
     }
 
