@@ -2,6 +2,7 @@ package ru.petrovpavel.passingtransportation.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,27 +11,41 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 
 import ru.petrovpavel.passingtransportation.R;
+import ru.petrovpavel.passingtransportation.adapter.AvailableRoutesAdapter;
 import ru.petrovpavel.passingtransportation.callback.NavigationReadyCallback;
+import ru.petrovpavel.passingtransportation.data.Route;
+import ru.petrovpavel.passingtransportation.data.memory.RoutesHolder;
 import ru.petrovpavel.passingtransportation.interfaces.NavigationStatusListener;
+import ru.petrovpavel.passingtransportation.utils.RouteConfirmationDialogBuilder;
 
 public class FragmentNavigation extends Fragment {
 
+    private static final String TAG = "FragmentNavigation";
+
     @Nullable
     private NavigationView navigationView;
-
     private Point origin;
-
     private Point destination;
+    private Activity mActivity;
+    private NavigationReadyCallback onNavigationReadyCallback;
+
+    private final FirebaseDatabase firebaseDB = FirebaseDatabase.getInstance();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        mActivity = getActivity();
         return inflater.inflate(R.layout.route_navigation, container, false);
     }
 
@@ -40,13 +55,15 @@ public class FragmentNavigation extends Fragment {
         initPoints();
         navigationView = view.findViewById(R.id.navigation_view_fragment);
         navigationView.onCreate(savedInstanceState);
+        onNavigationReadyCallback = new NavigationReadyCallback(
+                getActivity(),
+                navigationView,
+                new NavigationListener(getActivity()),
+                origin,
+                destination);
+        availableRoutesAdapterInitialization();
         navigationView.initialize(
-                new NavigationReadyCallback(
-                        getActivity(),
-                        navigationView,
-                        new NavigationListener(getActivity()),
-                        origin,
-                        destination),
+                onNavigationReadyCallback,
                 getInitialPosition());
     }
 
@@ -144,6 +161,48 @@ public class FragmentNavigation extends Fragment {
         if (navigationView != null) {
             navigationView.onDestroy();
         }
+    }
+
+    private void availableRoutesAdapterInitialization() {
+        DatabaseReference routes = firebaseDB.getReference("available_routes");
+
+        routes.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Route value = snapshot.getValue(Route.class);
+                RoutesHolder.getInstance().addAvailableRoute(value);
+                Log.d(TAG, "Added value: " + value);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Route value = snapshot.getValue(Route.class);
+                RoutesHolder.getInstance().addAvailableRouteIfAbsent(value);
+                Log.d(TAG, "Changed value: " + value);
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                Route value = snapshot.getValue(Route.class);
+                RoutesHolder.getInstance().removeAvailableRoute(value);
+                Log.d(TAG, "Removed value: " + value);
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+
+        AvailableRoutesAdapter availableRoutesAdapter = new AvailableRoutesAdapter(mActivity, RoutesHolder.getInstance().getAvailableRoutes());
+        availableRoutesAdapter.setListener(route -> {
+            RouteConfirmationDialogBuilder.build(mActivity, route.getOrigin().getAlias(), route.getDestination().getAlias());
+        });
     }
 
     private static class NavigationListener implements NavigationStatusListener {
