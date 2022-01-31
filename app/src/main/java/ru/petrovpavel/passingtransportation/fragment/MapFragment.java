@@ -32,6 +32,7 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,17 +45,20 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.slider.Slider;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -99,6 +103,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Vector;
 
 import retrofit2.Call;
@@ -109,6 +114,8 @@ import ru.petrovpavel.passingtransportation.adapter.AvailableRoutesAdapter;
 import ru.petrovpavel.passingtransportation.data.MapData;
 import ru.petrovpavel.passingtransportation.data.MotorContract;
 import ru.petrovpavel.passingtransportation.data.Route;
+import ru.petrovpavel.passingtransportation.data.memory.VehicleHolder;
+import ru.petrovpavel.passingtransportation.listener.OnSearchPassingRoutesCheckedChangeListener;
 import ru.petrovpavel.passingtransportation.utils.RouteConfirmationDialogBuilder;
 import ru.petrovpavel.passingtransportation.utils.Utility;
 import ru.petrovpavel.passingtransportation.widget.CollectionWidgetProvider;
@@ -135,15 +142,11 @@ public class MapFragment extends Fragment {
     private Activity mActivity;
     private View rootView;
 
-    private final List<Route> availableRoutes = new ArrayList<>();
-    private final FirebaseDatabase firebaseDB = FirebaseDatabase.getInstance();
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         rootView = inflater.inflate(R.layout.fragment_map, container, false);
-        routesInitialization();
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
         DrawerLayout drawer = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
@@ -293,38 +296,70 @@ public class MapFragment extends Fragment {
                 }
             }
         });
-        RecyclerView routesView = (RecyclerView) rootView.findViewById(R.id.routesList);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
-        routesView.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mActivity,
-                layoutManager.getOrientation());
-        routesView.addItemDecoration(dividerItemDecoration);
+        ConstraintLayout vehicleLayout = (ConstraintLayout) rootView.findViewById(R.id.vehicleSettings);
+        Slider capacitySlider = (Slider) rootView.findViewById(R.id.sliderCapacity);
 
-        AvailableRoutesAdapter availableRoutesAdapter = new AvailableRoutesAdapter(mActivity, availableRoutes);
-        availableRoutesAdapter.setListener(route -> {
-            Toast.makeText(mActivity,
-                    MessageFormat.format("Origin = {0}, destination = {1} was clicked", route.getOrigin().getAlias(), route.getDestination().getAlias()),
-                    Toast.LENGTH_SHORT).show();
-            RouteConfirmationDialogBuilder.build(mActivity, route.getOrigin().getAlias(), route.getDestination().getAlias());
-        });
-
-        routesView.setAdapter(availableRoutesAdapter);
-
-        Button availableRoutesPath = (Button) rootView.findViewById(R.id.available_routes);
-        availableRoutesPath.setOnClickListener(new View.OnClickListener() {
+        TextInputEditText capacityValue = rootView.findViewById(R.id.editTextCapacity);
+        TextInputLayout EditTextIP = (TextInputLayout) rootView.findViewById(R.id.layoutCapacity);
+        capacityValue.setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public void onClick(View view) {
-                routesView.setVisibility(View.VISIBLE);
-                mapView.setVisibility(View.GONE);
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                // If the event is a key-down event on the "enter" button
+                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    int Min = 1;
+                    int Max = 500;
+
+                    String str = EditTextIP.getEditText().getText().toString();
+
+
+                    if (str.equals("") || str.contains("\n")) {
+                        EditTextIP.setError("Cannot be blank");
+                        EditTextIP.setErrorEnabled(true);
+                    }
+                    else {
+                        int inputToInt = Integer.parseInt(str);
+
+                        if (inputToInt >= Min && inputToInt <= Max) {
+
+                            //Show number
+                            Snackbar.make(view, str, Snackbar.LENGTH_SHORT).show();
+                            EditTextIP.setErrorEnabled(false);
+
+                            capacitySlider.setValue(inputToInt);
+
+                        } else {
+                            //Clear text
+                            EditTextIP.getEditText().setText("");
+                            //Show Error
+                            EditTextIP.setError("Number must be between 1-500");
+                            EditTextIP.setErrorEnabled(true);
+                        }
+                    }
+                    return true;
+                }
+                return false;
             }
         });
 
+        capacitySlider.addOnChangeListener(new Slider.OnChangeListener() {
+            @Override
+            public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
+                int roundedValue = Math.round(value);
+                EditTextIP.setErrorEnabled(false);
+                capacityValue.setText(String.valueOf(roundedValue));
+            }
+        });
 
-        Button driveButton = (Button) rootView.findViewById(R.id.drive);
+        SwitchMaterial switchSearchRoutes = rootView.findViewById(R.id.switchSearchPassingRoutes);
+        switchSearchRoutes.setOnCheckedChangeListener(new OnSearchPassingRoutesCheckedChangeListener(capacityValue));
+
+
+        Button driveButton = (Button) rootView.findViewById(R.id.route_tab);
         driveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                routesView.setVisibility(View.GONE);
+                vehicleLayout.setVisibility(View.GONE);
                 if (Utility.hasNetworkConnection(mActivity)) {
                     if (map != null) {
                         mapView.setVisibility(View.VISIBLE);
@@ -339,6 +374,15 @@ public class MapFragment extends Fragment {
                 } else {
                     Toast.makeText(mActivity, R.string.network_unavailable, Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        Button vehicleButton = (Button) rootView.findViewById(R.id.vehicle_tab);
+        vehicleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                vehicleLayout.setVisibility(View.VISIBLE);
+                mapView.setVisibility(View.GONE);
             }
         });
 
@@ -384,20 +428,12 @@ public class MapFragment extends Fragment {
         rootView.findViewById(R.id.drive_toggle_fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
+                Optional.ofNullable(capacityValue.getText())
+                        .map(CharSequence::toString)
+                        .map(Integer::parseInt)
+                        .ifPresent(value -> VehicleHolder.getInstance().setAvailableCapacity(value));
                 autocompleteStart.clearFocus();
                 autocompleteDestination.clearFocus();
-//                Bundle arguments = new Bundle();
-//                arguments.putString(Intent.EXTRA_TEXT, route_id);
-//
-//                DriveFragment fragment = new DriveFragment();
-//                fragment.setArguments(arguments);
-//
-//                getActivity().getSupportFragmentManager().beginTransaction()
-//                        .addToBackStack(getString(R.string.back))
-//                        .add(R.id.frag_container, fragment, FRAGMENT_TAG_REST)
-//                        .commit();
                 Bundle arguments = new Bundle();
                 arguments.putDouble(getString(R.string.origin_lng), origin.getLongitude());
                 arguments.putDouble(getString(R.string.origin_lat), origin.getLatitude());
@@ -793,44 +829,6 @@ public class MapFragment extends Fragment {
         return Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
     }
 
-    private void routesInitialization() {
-        DatabaseReference myRef = firebaseDB.getReference("available_routes");
-
-        myRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Route value = snapshot.getValue(Route.class);
-                availableRoutes.add(value);
-                Log.d(TAG, "Added value: " + value);
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Route value = snapshot.getValue(Route.class);
-                if (!availableRoutes.contains(value)) {
-                    availableRoutes.add(value);
-                }
-                Log.d(TAG, "Changed value: " + value);
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                Route value = snapshot.getValue(Route.class);
-                availableRoutes.remove(value);
-                Log.d(TAG, "Removed value: " + value);
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-    }
 
     private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
         // Method is used to interpolate the marker animation.
