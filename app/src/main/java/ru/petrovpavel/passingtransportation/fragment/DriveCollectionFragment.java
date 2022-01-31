@@ -100,7 +100,7 @@ public class DriveCollectionFragment extends Fragment implements LoaderManager.L
 
         Activity mActivity = getActivity();
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.drive);
+        toolbar.setTitle(R.string.route_tab);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);

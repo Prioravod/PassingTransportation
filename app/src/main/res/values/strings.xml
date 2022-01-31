@@ -21,7 +21,7 @@
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <string name="about">About</string>
-    <string name="drive">Drive</string>
+    <string name="route_tab">Route</string>
     <string name="network_unavailable">Network Unavailable! Please try later!</string>
     <string name="network_info">Network Unavailable! Some feature may not work properly!</string>
     <string name="choose_dest">Choose Destination…</string>
@@ -38,7 +38,7 @@
     <string name="no_drives_available">No Drives Available!</string>
     <string name="enter_starting_point">Enter Starting Point</string>
     <string name="walk">Walk</string>
-    <string name="available_routes">Available routes</string>
+    <string name="vehicle_tab">Settings</string>
     <string name="delete_all">Delete All</string>
     <string name="app_logo">App Logo</string>
     <string name="get_present_location">Get present location</string>

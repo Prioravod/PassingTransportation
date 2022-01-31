@@ -27,7 +27,7 @@
         <item
             android:id="@+id/nav_directions"
             android:icon="@drawable/ic_navigation_black_36dp"
-            android:title="@string/drive" />
+            android:title="@string/route_tab" />
     </group>
 
     <group

@@ -193,8 +193,8 @@
                             android:layout_width="@dimen/zero"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:contentDescription="@string/drive"
-                            android:text="@string/drive" />
+                            android:contentDescription="@string/route_tab"
+                            android:text="@string/route_tab" />
 
                         <Button
                             android:id="@+id/vehicle_tab"
@@ -202,8 +202,8 @@
                             android:layout_width="@dimen/zero"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:contentDescription="@string/available_routes"
-                            android:text="@string/available_routes" />
+                            android:contentDescription="@string/vehicle_tab"
+                            android:text="@string/vehicle_tab" />
 
                     </LinearLayout>
                 </LinearLayout>
