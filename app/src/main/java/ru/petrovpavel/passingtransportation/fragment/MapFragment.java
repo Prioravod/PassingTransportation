@@ -116,6 +116,8 @@ import ru.petrovpavel.passingtransportation.data.MotorContract;
 import ru.petrovpavel.passingtransportation.data.Route;
 import ru.petrovpavel.passingtransportation.data.memory.VehicleHolder;
 import ru.petrovpavel.passingtransportation.listener.OnSearchPassingRoutesCheckedChangeListener;
+import ru.petrovpavel.passingtransportation.listener.VehicleSliderChangeListener;
+import ru.petrovpavel.passingtransportation.listener.VehicleTextInputEditTextListener;
 import ru.petrovpavel.passingtransportation.utils.RouteConfirmationDialogBuilder;
 import ru.petrovpavel.passingtransportation.utils.Utility;
 import ru.petrovpavel.passingtransportation.widget.CollectionWidgetProvider;
@@ -125,8 +127,9 @@ public class MapFragment extends Fragment {
 
     private final static String TAG = "MapFragment";
     private static final int PERMISSIONS_LOCATION = 0;
-    private static String route_id;
     private final String FRAGMENT_TAG_REST = "FTAGR";
+
+    private static String route_id;
     FloatingActionButton floatingActionButton;
     LocationComponent locationComponent;
     LocationEngine locationEngine;
@@ -156,33 +159,8 @@ public class MapFragment extends Fragment {
         toggle.syncState();
         setRetainInstance(true);
 
-        final GeocoderAutoCompleteView autocompleteStart = (GeocoderAutoCompleteView) rootView.findViewById(R.id.query_start);
-
-        autocompleteStart.setAccessToken(BuildConfig.MAPBOX_TOKEN);
-        autocompleteStart.setType(GeocodingCriteria.TYPE_POI);
-//        autocompleteStart.setType(GeocodingCriteria.TYPE_ADDRESS);
-
-        autocompleteStart.setOnFeatureListener(new GeocoderAutoCompleteView.OnFeatureListener() {
-            @Override
-            public void OnFeatureClick(GeocodingFeature feature) {
-                Position position = feature.asPosition();
-                updateMap(position.getLatitude(), position.getLongitude(), true);
-            }
-        });
-
-
-        final GeocoderAutoCompleteView autocompleteDestination = (GeocoderAutoCompleteView) rootView.findViewById(R.id.query_destination);
-        autocompleteDestination.setAccessToken(BuildConfig.MAPBOX_TOKEN);
-        autocompleteDestination.setType(GeocodingCriteria.TYPE_POI);
-//        autocompleteStart.setType(GeocodingCriteria.TYPE_ADDRESS);
-        autocompleteDestination.setOnFeatureListener(new GeocoderAutoCompleteView.OnFeatureListener() {
-            @Override
-            public void OnFeatureClick(GeocodingFeature feature) {
-                Position position = feature.asPosition();
-                updateMap(position.getLatitude(), position.getLongitude(), false);
-            }
-        });
-
+        final GeocoderAutoCompleteView autocompleteStart = getAutoCompleteView(R.id.query_start, true);
+        final GeocoderAutoCompleteView autocompleteDestination = getAutoCompleteView(R.id.query_destination, false);
 
         mapView = (MapView) rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -297,62 +275,23 @@ public class MapFragment extends Fragment {
             }
         });
         ConstraintLayout vehicleLayout = (ConstraintLayout) rootView.findViewById(R.id.vehicleSettings);
+
         Slider capacitySlider = (Slider) rootView.findViewById(R.id.sliderCapacity);
-
         TextInputEditText capacityValue = rootView.findViewById(R.id.editTextCapacity);
-        TextInputLayout EditTextIP = (TextInputLayout) rootView.findViewById(R.id.layoutCapacity);
-        capacityValue.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                // If the event is a key-down event on the "enter" button
-                if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    int Min = 1;
-                    int Max = 500;
+        TextInputLayout capacityEditTextIL = (TextInputLayout) rootView.findViewById(R.id.layoutCapacity);
 
-                    String str = EditTextIP.getEditText().getText().toString();
+        capacityValue.setOnKeyListener(new VehicleTextInputEditTextListener(capacityEditTextIL, capacitySlider));
+        capacitySlider.addOnChangeListener(new VehicleSliderChangeListener(capacityEditTextIL, capacityValue));
 
+        Slider delaySlider = (Slider) rootView.findViewById(R.id.sliderDelay);
+        TextInputEditText delayValue = rootView.findViewById(R.id.editTextDelay);
+        TextInputLayout delayEditTextIL = (TextInputLayout) rootView.findViewById(R.id.layoutDelay);
 
-                    if (str.equals("") || str.contains("\n")) {
-                        EditTextIP.setError("Cannot be blank");
-                        EditTextIP.setErrorEnabled(true);
-                    }
-                    else {
-                        int inputToInt = Integer.parseInt(str);
-
-                        if (inputToInt >= Min && inputToInt <= Max) {
-
-                            //Show number
-                            Snackbar.make(view, str, Snackbar.LENGTH_SHORT).show();
-                            EditTextIP.setErrorEnabled(false);
-
-                            capacitySlider.setValue(inputToInt);
-
-                        } else {
-                            //Clear text
-                            EditTextIP.getEditText().setText("");
-                            //Show Error
-                            EditTextIP.setError("Number must be between 1-500");
-                            EditTextIP.setErrorEnabled(true);
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        capacitySlider.addOnChangeListener(new Slider.OnChangeListener() {
-            @Override
-            public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
-                int roundedValue = Math.round(value);
-                EditTextIP.setErrorEnabled(false);
-                capacityValue.setText(String.valueOf(roundedValue));
-            }
-        });
+        delayValue.setOnKeyListener(new VehicleTextInputEditTextListener(delayEditTextIL, delaySlider));
+        delaySlider.addOnChangeListener(new VehicleSliderChangeListener(delayEditTextIL, delayValue));
 
         SwitchMaterial switchSearchRoutes = rootView.findViewById(R.id.switchSearchPassingRoutes);
-        switchSearchRoutes.setOnCheckedChangeListener(new OnSearchPassingRoutesCheckedChangeListener(capacityValue));
+        switchSearchRoutes.setOnCheckedChangeListener(new OnSearchPassingRoutesCheckedChangeListener(capacityValue, delayValue));
 
 
         Button driveButton = (Button) rootView.findViewById(R.id.route_tab);
@@ -473,6 +412,20 @@ public class MapFragment extends Fragment {
         }
 
         return rootView;
+    }
+
+    @NonNull
+    private GeocoderAutoCompleteView getAutoCompleteView(int autoCompleteViewId, boolean isOrigin) {
+        final GeocoderAutoCompleteView autocompleteStart = (GeocoderAutoCompleteView) rootView.findViewById(autoCompleteViewId);
+
+        autocompleteStart.setAccessToken(BuildConfig.MAPBOX_TOKEN);
+        autocompleteStart.setType(GeocodingCriteria.TYPE_POI);
+
+        autocompleteStart.setOnFeatureListener(feature -> {
+            Position position = feature.asPosition();
+            updateMap(position.getLatitude(), position.getLongitude(), isOrigin);
+        });
+        return autocompleteStart;
     }
 
     private boolean validateForm(GeocoderAutoCompleteView autocompleteStart, GeocoderAutoCompleteView autoCompleteDestination) {
