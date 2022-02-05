@@ -9,11 +9,13 @@ import java.util.Optional;
 
 import ru.petrovpavel.passingtransportation.data.Capacity;
 import ru.petrovpavel.passingtransportation.data.Cargo;
+import ru.petrovpavel.passingtransportation.data.Delay;
 import ru.petrovpavel.passingtransportation.data.Vehicle;
 
 public class VehicleHolder {
 
     public static final Integer UNDEFINED_CAPACITY = -1;
+    public static final Integer UNDEFINED_DELAY = -1;
     private static final String TAG = "VehicleHolder";
     private boolean isEnabled = false;
 
@@ -40,6 +42,17 @@ public class VehicleHolder {
         vehicle.setCapacity(capacity);
     }
 
+    public int getDelay() {
+        return Optional.ofNullable(vehicle.getDelay())
+                .map(Delay::getMinutesValue)
+                .orElse(VehicleHolder.UNDEFINED_DELAY);
+    }
+
+    public void setDelay(Integer delayMinutes) {
+        Delay delay = buildDelay(delayMinutes); //TODO: rewrite to use Delay argument
+        vehicle.setDelay(delay);
+    }
+
     public void loadCargo(Integer cargoWeight) {
         Cargo cargo = buildCargo(cargoWeight);//TODO: rewrite to use Cargo argument
         this.getCargoList().add(cargo);
@@ -61,6 +74,12 @@ public class VehicleHolder {
         Capacity capacity = new Capacity();
         capacity.setWeight(capacityWeight);
         return capacity;
+    }
+
+    private Delay buildDelay(Integer delayMinutes) {
+        Delay delay = new Delay();
+        delay.setMinutesValue(delayMinutes);
+        return delay;
     }
 
     private List<Cargo> getCargoList() {

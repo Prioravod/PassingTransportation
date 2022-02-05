@@ -12,6 +12,8 @@ public class Vehicle {
 
     private Capacity capacity;
 
+    private Delay delay;
+
     private Integer earnings;
 
     private List<Cargo> cargoList = new ArrayList<>();
