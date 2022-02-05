@@ -3,7 +3,7 @@ package ru.petrovpavel.passingtransportation.engine;
 import android.app.Activity;
 import android.location.Location;
 
-import java.util.List;
+import com.mapbox.geojson.Point;
 
 import ru.petrovpavel.passingtransportation.data.Route;
 
@@ -18,13 +18,23 @@ public class RouteEngineProxy implements RouteEngine {
         this.tickCounter = 0;
     }
 
-    public List<Route> findOptimalRoutes(Activity activity, Location location) {
+    public Route findOptimalRoute(Activity activity, Location location, Point destination) {
         if (tickCounter == TICK_MAX) {
             tickCounter = 0;
-            return engine.findOptimalRoutes(activity, location);
+            return engine.findOptimalRoute(activity, location, destination);
         } else {
             tickCounter++;
         }
         return null;
+    }
+
+    @Override
+    public void buildNewRoute(Route optimalRoute, Location location) {
+
+    }
+
+    @Override
+    public void rejectRoute(Route rejectedRoute) {
+
     }
 }
