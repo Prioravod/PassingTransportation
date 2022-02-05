@@ -31,4 +31,11 @@
     <dimen name="widget_list_item_height">56dp</dimen>
     <dimen name="margin_start_collapsing_toolbar">48dp</dimen>
     <dimen name="widget_logo_icon">34dp</dimen>
+
+    <dimen name="capacity_slider_max_value">500</dimen>
+    <dimen name="capacity_slider_min_value">1</dimen>
+    <dimen name="capacity_slider_step">1</dimen>
+    <dimen name="delay_slider_max_value">180</dimen>
+    <dimen name="delay_slider_min_value">1</dimen>
+    <dimen name="delay_slider_step">1</dimen>
 </resources>
