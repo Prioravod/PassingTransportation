@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class Route {
 
-    private static final String DISPLAY_TEMPLATE = "{0} -> {1} {3} кг {4} р";
+    private static final String DISPLAY_TEMPLATE = "{0} -> {1} {2} кг {3} р";
 
     private MapPoint destination;
 
