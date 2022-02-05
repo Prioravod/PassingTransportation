@@ -23,6 +23,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/textCapacity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -35,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/text_capacity"
+            app:layout_constraintStart_toStartOf="@+id/textCapacity"
             app:layout_constraintTop_toTopOf="parent"
             app:boxBackgroundColor="#ffbdc7fd"
             app:boxStrokeWidth="0dp"
@@ -43,7 +44,7 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextCapacity"
-                android:layout_width="wrap_content"
+                android:layout_width="65dp"
                 android:layout_height="match_parent"
                 android:hint="КГ"
                 android:inputType="numberSigned"
@@ -58,13 +59,69 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="32dp"
-        android:valueFrom="1"
-        android:value="1"
-        android:valueTo="500"
-        android:stepSize="1"
+        android:valueFrom="@dimen/capacity_slider_min_value"
+        android:valueTo="@dimen/capacity_slider_max_value"
+        android:stepSize="@dimen/capacity_slider_step"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayoutCapacity" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutDelay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sliderCapacity">
+
+        <TextView
+            android:id="@+id/textDelay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="Допустимая задержка"
+            android:textSize="16sp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutDelay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textDelay"
+            app:layout_constraintTop_toTopOf="parent"
+            app:boxBackgroundColor="#ffbdc7fd"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextDelay"
+                android:layout_width="65dp"
+                android:minWidth="40dp"
+                android:layout_height="match_parent"
+                android:hint="МИН"
+                android:inputType="numberSigned"
+                android:shadowColor="#BDC7FD"
+                android:text="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sliderDelay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="32dp"
+        android:valueFrom="@dimen/delay_slider_min_value"
+        android:valueTo="@dimen/delay_slider_max_value"
+        android:stepSize="@dimen/delay_slider_step"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutDelay" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switchSearchPassingRoutes"
@@ -76,6 +133,6 @@
         android:text="Поиск попутных маршрутов"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sliderCapacity" />
+        app:layout_constraintTop_toBottomOf="@+id/sliderDelay" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
