@@ -1,61 +1,20 @@
-# Moto-Navigator
-This is a navigation based ongoing project. It contains different module.
+# Passing transportation
+Application - navigator with a module for searching for passing transportation
 
-## Moto-Navigator App
-Moto Navigator App is a navigation app available for Android. It uses your phone’s internet connection (4G/3G/2G/EDGE or Wi-Fi, as available) and GPS connection to track your present location and show you the navigation path to the destination via WALK/CYCLE/CAR routes. It uses API from mapbox. You can also save the paths for offline later access.
-
-## Why use Moto Navigator App
-
-- **NO FEES:** Moto Navigator App uses your phone’s internet connection (4G/3G/2G/EDGE or Wi-Fi, as available) and GPS connection to track and show you the navigation path. You don’t have to pay for getting the path info.
-- **OFFLINE ACCESS:** At anytime you can access your saved paths offline.
-
-## Intended User
-
-Moto Navigator App is customized for travellers.
+## Passing transportation
+Is based on MapBox API with own proprietary optimization kernel
 
 ## Features
 
-- Get present location of the user.
-- Get routes to destination via WALK/CYCLE/CAR paths.
-- Can see the saved paths anytime.
-- Get the saved paths link directly in user's home screen through widget.
-
-## User Interface Mocks
-
-Splash Screen | Login Screen | Navigation Drawer
-:-:|:-:|:-:
-![splash screen](https://cloud.githubusercontent.com/assets/13851773/21486618/7af27da6-cbdd-11e6-994a-95278597fb39.png) | ![login screen](https://cloud.githubusercontent.com/assets/13851773/21486616/7a8a8372-cbdd-11e6-8b08-09b759a596e9.png) | ![mapscreen1](https://cloud.githubusercontent.com/assets/13851773/21486613/7a890c0e-cbdd-11e6-92fe-55483c54105e.png)
-
-Map Screen1 | Map Screen2 | Navigation Screen Portrait
-:-:|:-:|:-:
-![map screen2](https://cloud.githubusercontent.com/assets/13851773/21486615/7a8a7b5c-cbdd-11e6-80c1-dec5c33419a0.png) | ![mapscreen3](https://cloud.githubusercontent.com/assets/13851773/21486946/dc46d696-cbe3-11e6-9195-e44c00b1d8e9.png) | ![navigation screen portrait](https://cloud.githubusercontent.com/assets/13851773/21486621/7af3fb36-cbdd-11e6-9292-e6c9781fe082.png)
-
-Navigation Screen Landscape | Drive Screen | Info Screen | Widget Screen
-:-:|:-:|:-:|:-:
-![navigation screen landscape](https://cloud.githubusercontent.com/assets/13851773/21486620/7af32986-cbdd-11e6-813a-d8213c6d29ca.png) | ![drive screen](https://cloud.githubusercontent.com/assets/13851773/21486614/7a8a5bae-cbdd-11e6-9f8d-bc55ede81911.png) | ![auto screen](https://cloud.githubusercontent.com/assets/13851773/21486612/7a87bb74-cbdd-11e6-9757-5ab99cd20164.png) | ![widget screen](https://cloud.githubusercontent.com/assets/13851773/21486619/7af2e246-cbdd-11e6-9949-ba1e43f77cae.png)
+- Simple route search from point A to point B.
+- Setting the carrying capacity and possible delay in the route.
+- Receiving suggestions about possible routes along the route.
 
 ## Technologies used
 
 - Mapbox SDK
 - Firebase
 - Google Play Services
-
-## Development Setup
-1. Go to the project repo and click the `Fork` button
-2. Clone your forked repository : `git clone git@github.com:your_name/moto-navigator.git`
-3. Open the project with Android Studio
-4. Add your ```google-services.json``` from firebase project in ```app/```
-
-## How to build
-
-All dependencies are defined in ```app/build.gradle```.
-Import the project in Android Studio or use Gradle in command line:
-
-```
-./gradlew assembleDebug
-```
-
-The result apk file will be placed in ```app/build/outputs/apk/```.
 
 ## Project License
 ```
