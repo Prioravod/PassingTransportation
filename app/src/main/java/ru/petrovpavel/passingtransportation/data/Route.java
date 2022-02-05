@@ -8,15 +8,15 @@ import lombok.Data;
 @Data
 public class Route {
 
-    private static final String DISPLAY_TEMPLATE = "{0} -> {1} {3} кг {4, number, double} р";
-
-    private MapPoint origin;
+    private static final String DISPLAY_TEMPLATE = "{0} -> {1} {3} кг {4} р";
 
     private MapPoint destination;
 
-    private Double weight;
+    private MapPoint origin;
 
-    private Double payment;
+    private Integer payment;
+
+    private Integer weight;
 
     @Override
     public String toString() {
@@ -26,6 +26,6 @@ public class Route {
         String to = Optional.ofNullable(destination)
                 .map(MapPoint::getAlias)
                 .orElse("");
-        return MessageFormat.format(DISPLAY_TEMPLATE, from, to, weight, payment);
+        return MessageFormat.format(DISPLAY_TEMPLATE, from, to, weight.toString(), payment.toString());
     }
 }
