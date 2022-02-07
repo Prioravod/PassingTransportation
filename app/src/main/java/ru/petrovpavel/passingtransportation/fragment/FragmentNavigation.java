@@ -176,9 +176,9 @@ public class FragmentNavigation extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Route value = snapshot.getValue(Route.class);
-                RoutesHolder.getInstance().addAvailableRouteIfAbsent(value);
-                Log.d(TAG, "Changed value: " + value);
+//                Route value = snapshot.getValue(Route.class);
+//                RoutesHolder.getInstance().addAvailableRouteIfAbsent(value);
+//                Log.d(TAG, "Changed value: " + value);
             }
 
             @Override
@@ -199,10 +199,10 @@ public class FragmentNavigation extends Fragment {
             }
         });
 
-        AvailableRoutesAdapter availableRoutesAdapter = new AvailableRoutesAdapter(mActivity, RoutesHolder.getInstance().getAvailableRoutes());
-        availableRoutesAdapter.setListener(route -> {
-            RouteConfirmationDialogBuilder.build(mActivity, route.getOrigin().getAlias(), route.getDestination().getAlias());
-        });
+//        AvailableRoutesAdapter availableRoutesAdapter = new AvailableRoutesAdapter(mActivity, RoutesHolder.getInstance().getAvailableRoutes());
+//        availableRoutesAdapter.setListener(route -> {
+//            RouteConfirmationDialogBuilder.build(mActivity, route.getOrigin().getAlias(), route.getDestination().getAlias());
+//        });
     }
 
     private static class NavigationListener implements NavigationStatusListener {

@@ -495,16 +495,10 @@ public class MapFragment extends Fragment {
         Log.d(TAG, "Origin :: lat " + origin.getLatitude() + " long " + origin.getLongitude());
         Log.d(TAG, "Destination :: lat " + destination.getLatitude() + " long " + destination.getLongitude());
 
-        ArrayList<Position> positions = new ArrayList<>();
-        positions.add(destination);
-        positions.add(Position.fromCoordinates(46.0201424, 51.5475297));
-        positions.add(Position.fromCoordinates(46.0255263, 51.5401292));
-        positions.add(origin);
 
         MapboxDirections client = new MapboxDirections.Builder()
                 .setOrigin(origin)
                 .setDestination(destination)
-//                .setCoordinates(positions)
                 .setProfile(profile)
                 .setSteps(true)
                 .setAccessToken(BuildConfig.MAPBOX_TOKEN)
