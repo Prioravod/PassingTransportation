@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.location.Location;
 
 import com.mapbox.geojson.Point;
+import com.mapbox.services.commons.models.Position;
+
+import java.util.ArrayList;
 
 import ru.petrovpavel.passingtransportation.data.Route;
 
@@ -13,8 +16,8 @@ public class RouteEngineProxy implements RouteEngine {
     private static final byte TICK_MAX = 15;
     private final RouteEngine engine;
 
-    public RouteEngineProxy() {
-        this.engine = new RouteEngineImpl();
+    public RouteEngineProxy(Activity activity) {
+        this.engine = new RouteEngineImpl(activity);
         this.tickCounter = 0;
     }
 
@@ -29,12 +32,12 @@ public class RouteEngineProxy implements RouteEngine {
     }
 
     @Override
-    public void buildNewRoute(Route optimalRoute, Location location) {
-
+    public ArrayList<Position> getEstimatedWaypointPositions(Route possibleRoute, Location originLocation, Point destination) {
+        return engine.getEstimatedWaypointPositions(possibleRoute, originLocation, destination);
     }
 
     @Override
-    public void rejectRoute(Route rejectedRoute) {
-
+    public ArrayList<Point> getEstimatedWaypoints(Route possibleRoute, Location originLocation, Point destination) {
+        return engine.getEstimatedWaypoints(possibleRoute, originLocation, destination);
     }
 }
