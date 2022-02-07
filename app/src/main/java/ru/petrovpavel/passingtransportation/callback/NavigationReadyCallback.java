@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.android.gms.common.util.CollectionUtils;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -36,6 +37,8 @@ import retrofit2.Response;
 import ru.petrovpavel.passingtransportation.BuildConfig;
 import ru.petrovpavel.passingtransportation.R;
 import ru.petrovpavel.passingtransportation.data.Route;
+import ru.petrovpavel.passingtransportation.data.RouteStatus;
+import ru.petrovpavel.passingtransportation.data.RouteWrapper;
 import ru.petrovpavel.passingtransportation.data.memory.RoutesHolder;
 import ru.petrovpavel.passingtransportation.engine.RouteEngineProxy;
 import ru.petrovpavel.passingtransportation.interfaces.NavigationStatusListener;
@@ -44,6 +47,7 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
 
     private static final String WAS_NAVIGATION_STOPPED = "was_navigation_stopped";
     private static final String WAS_IN_TUNNEL = "was_in_tunnel";
+    private static List<Point> WAYPOINTS;
 
     private final Activity activity;
     private final NavigationView navigationView;
@@ -59,7 +63,7 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
         this.listener = listener;
         this.origin = origin;
         this.destination = destination;
-        this.routeEngineProxy = new RouteEngineProxy();
+        this.routeEngineProxy = new RouteEngineProxy(activity);//TODO: init on routing running
     }
 
     @Override
@@ -79,16 +83,18 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
     }
 
     private void fetchRoute() {
-        NavigationRoute.builder(activity)
+        NavigationRoute.Builder builder = NavigationRoute.builder(activity)
                 .accessToken(BuildConfig.MAPBOX_TOKEN)
-                .profile(DirectionsCriteria.PROFILE_DRIVING)
-                .origin(origin)
-                .destination(destination)
-//                .addWaypoint(Point.fromLngLat(45.975300,51.601790))
-//                .addWaypoint(Point.fromLngLat(45.997630,51.601210))
-//                .addWaypointTargets(getWaypoints())
-                .alternatives(true)
-                .build()
+                .profile(DirectionsCriteria.PROFILE_DRIVING);
+
+        if (CollectionUtils.isEmpty(WAYPOINTS)) {
+            builder.origin(origin)
+                    .destination(destination)
+                    .alternatives(true);
+        } else {
+            WAYPOINTS.forEach(builder::addWaypoint);
+        }
+        builder.build()
                 .getRoute(new Callback<DirectionsResponse>() {
                     @Override
                     public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
@@ -118,14 +124,6 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
                 });
     }
 
-    private Point[] getWaypoints() {
-        List<Point> waypoints = new ArrayList<>();
-        waypoints.add(Point.fromLngLat(45.975300,51.601790));
-        waypoints.add(Point.fromLngLat(45.997630,51.601210));
-        waypoints.add(destination);
-        return waypoints.toArray(new Point[0]);
-    }
-
     private void startNavigation(DirectionsRoute directionsRoute) {
         synchronized (navigationView) {
             if (directionsRoute == null) {
@@ -143,22 +141,30 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
 
                         @Override
                         public void onNavigationFinished() {
-
+                            RoutesHolder.getInstance().finishTrip();
+                            stopNavigation();
+                            navigationView.stopNavigation();
                         }
 
                         @Override
                         public void onNavigationRunning() {
-
+                            //invoked when navigation was started
                         }
                     })
                     .progressChangeListener(new ProgressChangeListener() {
                         @Override
-                        public void onProgressChange(Location location, RouteProgress routeProgress) {
+                        public void onProgressChange(Location currentLocation, RouteProgress routeProgress) {
+                            RouteWrapper currentRoute = RoutesHolder.getInstance().getCurrentRoute();
+                            if (currentRoute != null) {
+                                Log.d("ROUTE CONFIRMED", currentRoute.toString());
+                                ArrayList<Point> estimatedWaypoints = routeEngineProxy.getEstimatedWaypoints(currentRoute.getRoute(), currentLocation, destination);
+                                WAYPOINTS = estimatedWaypoints;
+                            }
                             String traveledInfo = "Traveled : " + routeProgress.distanceTraveled();
                             Log.d("DISTANCE", traveledInfo);
-                            List<Route> optimalRoutes = routeEngineProxy.findOptimalRoutes(activity, location);
-                            if (optimalRoutes != null && !optimalRoutes.isEmpty()) {
-                                suggestRoutes(optimalRoutes);
+                            Route optimalRoute = routeEngineProxy.findOptimalRoute(activity, currentLocation, destination);
+                            if (optimalRoute != null) {
+                                suggestRoute(optimalRoute, currentLocation);
                             }
                         }
                     })
@@ -184,6 +190,7 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
     private void stopNavigation() {
         updateWasNavigationStopped(true);
         updateWasInTunnel(false);
+        WAYPOINTS = null;
     }
 
     private boolean wasInTunnel() {
@@ -215,14 +222,8 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
         editor.apply();
     }
 
-    private void suggestRoutes(List<Route> optimalRoutes) {
-//        Optional.ofNullable(optimalRoutes)
-//                .orElse(Collections.emptyList())
-//                .stream()
-//                .
-    }
 
-    private void suggestRoute(Route route) {
+    private void suggestRoute(Route optimalRoute, Location location) {
         if (IS_POPUP_SHOWED) {
             return;
         }
@@ -230,19 +231,19 @@ public class NavigationReadyCallback implements OnNavigationReadyCallback {
         final PopupWindow popupWindow = new PopupWindow(popupView, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
 
         TextView popupMessage = popupView.findViewById(R.id.layout_popup_txtMessage);
-        popupMessage.setText(route.getOrigin().getAlias());
+        popupMessage.setText(optimalRoute.getOrigin().getAlias());
 
         popupWindow.showAtLocation(popupView, Gravity.CENTER, 1, 1);
         IS_POPUP_SHOWED = popupWindow.isShowing();
 
         popupView.findViewById(R.id.accept_route_button).setOnClickListener(v -> {
-            //Close Window
+            RoutesHolder.getInstance().updateStatus(optimalRoute, RouteStatus.CONFIRMED);
             popupWindow.dismiss();
             IS_POPUP_SHOWED = popupWindow.isShowing();
         });
 
         popupView.findViewById(R.id.dismiss_route_button).setOnClickListener(v -> {
-            //Close Window
+            RoutesHolder.getInstance().updateStatus(optimalRoute, RouteStatus.REJECTED);
             popupWindow.dismiss();
             IS_POPUP_SHOWED = popupWindow.isShowing();
         });
