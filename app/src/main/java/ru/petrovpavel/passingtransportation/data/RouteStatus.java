@@ -10,5 +10,6 @@ public enum RouteStatus {
     CONFIRMED,
     REJECTED,
     PASSED,
-    RATED
+    RATED,
+    DELETED
 }
